@@ -45,6 +45,8 @@ class MyMessageSidebar extends React.Component
 
   render: =>
     accessToken = localStorage.getItem("todoist_token")
+    projects = @_getProjectsTodoist()
+    console.log(projects)
     if accessToken and accessToken != ""
       content = @_renderAddToTodoist()
     else
@@ -63,6 +65,14 @@ class MyMessageSidebar extends React.Component
 
     <div className="todoist-sidebar">
       <input className="textBox" type="text" value={@state.thread.subject}/>
+      <select>
+        <option value="Test">Test</option>
+        <option value="Test1">Test</option>
+        <option value="Test2">Test</option>
+        <option value="Test3">Test</option>
+        <option value="Test4">Test</option>
+        <option value="Test5">Test</option>
+      </select>
       <div className="buttonFullWidth" onClick={@_addToTodoistPost}><p>Add to Todoist</p></div>
       <div style={display: "inline-block"}>
         <div className="transparentButton" onClick={@_logoutTodoist}><p>Logout from Todoist</p></div>
@@ -74,6 +84,23 @@ class MyMessageSidebar extends React.Component
 
   guidCreate: () ->
      "#{@s4()}#{@s4()}-#{@s4()}-#{@s4()}-#{@s4()}-#{@s4()}#{@s4()}#{@s4()}"
+
+  _getProjectsTodoist: =>
+    accessToken = localStorage.getItem("todoist_token")
+    uuidVal = @guidCreate()
+    temp_idVal = @guidCreate()
+    taskName = @state.thread.subject
+    command = [{ type: "reqource_types=[\"projects\"]", uuid: uuidVal, temp_id: temp_idVal, args: { content: taskName}}]
+    payload = { token: accessToken, commands: JSON.stringify(command) }
+    console.log(payload)
+
+    if accessToken
+       request
+       .post("https://todoist.com/API/v6/sync")
+       .send(payload)
+       .set("Content-Type","application/x-www-form-urlencoded")
+       .end(@handleAddToTodoistResponse)
+       console.log(request)
 
   _addToTodoistPost: =>
      accessToken = localStorage.getItem("todoist_token")
